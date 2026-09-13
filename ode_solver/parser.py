@@ -49,7 +49,14 @@ def parse_coefficient(text):
     if text == "-":
         return -1
     text = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', text)
-    return sp.sympify(text)
+    expr = sp.sympify(text)
+
+    y_symbol = sp.symbols('y')
+    y_func = sp.Function('y')
+    x = sp.symbols('x')
+    expr = expr.subs(y_symbol, y_func(x))
+
+    return expr
  
  
 def strip_derivative(term):
