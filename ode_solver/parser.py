@@ -11,7 +11,6 @@ def parse_ode(equation):
  
     parsed_left = 0
     for expression in split_terms(left):
-        print(expression)
         if "'" in expression:
             parsed_left += parse_derivative(expression)
         else:
@@ -23,6 +22,8 @@ def parse_ode(equation):
             parsed_right += parse_derivative(expression)
         else:
             parsed_right += parse_expression(expression)
+
+    print(sp.Eq(parsed_left, parsed_right))
  
     return sp.Eq(parsed_left, parsed_right)
  
@@ -35,6 +36,7 @@ def split_equation(equation):
 
 def split_terms(expression):
     return re.findall(r'[+-]?[^+-]+', expression)
+
 
 def parse_expression(expression):
     expression = expression.replace("^", "**")
@@ -67,8 +69,3 @@ def parse_derivative(derivative):
     coefficient = parse_coefficient(coefficient_part)
  
     return coefficient * deriv_expr
-
-
-ode = "y' + 2*y = e^x"
-parsed_ode = parse_ode(ode)
-print(parsed_ode)
