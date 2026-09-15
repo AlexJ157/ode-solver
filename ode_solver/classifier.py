@@ -73,6 +73,16 @@ def is_seperable(rhs):
 
     return True, {"f(x)": f_x, "g(x)": g_y}
 
+def is_homogeneous(rhs): # TODO lots of cases will break parser as it doesnt rcognise fractions with brackets
+    v = sp.Symbol('v')
+    substituted = rhs.subs(y(x), v*x)
+    simplified = sp.simplify(substituted)
+
+    if simplified.has(x):
+        return False, None
+
+    return True, {"v_expr": simplified}
+
 linear_test_odes = [
     "y' + 2*y = e^x",
     "y' - 3*y = 0",
