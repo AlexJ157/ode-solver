@@ -1,6 +1,9 @@
 import sympy as sp
 import parser
 
+x = sp.symbols('x')
+y = sp.Function('y')
+
 def normalize_first_order(eq):
     x = sp.symbols('x')
     y = sp.Function('y')
@@ -14,9 +17,6 @@ def normalize_first_order(eq):
     return solved[0]
 
 def is_linear(rhs):
-    x = sp.symbols('x')
-    y = sp.Function('y')
-
     try:
         poly = sp.Poly(rhs, y(x))
     except sp.PolynomialError:
@@ -42,19 +42,58 @@ def is_linear(rhs):
 
     return True, {"P": P, "Q": Q}
 
+def is_seperable(rhs):
+    combined = sp.together(rhs)
+    factored = sp.factor(combined)
+    factors = factored.as_ordered_factors()
 
+    f_x_parts = []
+    g_y_parts = []
 
-test_odes = [
+    for factor in factors:
+        has_y = factor.has(y(x))
+
+        if not has_y:
+            f_x_parts.append(factor)
+            continue
+
+        placeholder = sp.Dummy('Y')
+        swapped = factor.subs(y(x), placeholder)
+
+        if swapped.has(x):
+            return False, None   # genuinely mixed — x remains even without y(x)
+
+        g_y_parts.append(factor)
+
+    if len(g_y_parts) == 0:
+        return True, {"f(x)": factored, "g(x)": 1}
+
+    f_x = sp.Mul(*f_x_parts)
+    g_y = sp.Mul(*g_y_parts)
+
+    return True, {"f(x)": f_x, "g(x)": g_y}
+
+linear_test_odes = [
     "y' + 2*y = e^x",
     "y' - 3*y = 0",
     "y' + y = x**2",
     "y' = x**2",
     "y' = y**2",
 ]
+
+seperable_test_odes = [
+    "y' = x*y",
+    "y' = x**2",
+    "y' = y**2",
+    "y' = e^x/y",
+    "y' = x*y**2 + x",
+    "y' = x+y",
+    "y' = x**2 + y**2",
+]
  
-for ode_str in test_odes:
+for ode_str in seperable_test_odes:
     eq = parser.parse_ode(ode_str)
     rhs = normalize_first_order(eq)
-    result = is_linear(rhs)
-    print(f"{ode_str}  ->  rhs = {rhs}  ->  is_linear = {result}")
+    result = is_seperable(rhs)
+    print(f"{ode_str}  ->  rhs = {rhs}  ->  seperable = {result}")
     print()
