@@ -66,12 +66,12 @@ def is_seperable(rhs):
         g_y_parts.append(factor)
 
     if len(g_y_parts) == 0:
-        return True, {"f(x)": factored, "g(x)": 1}
+        return True, {"f(x)": factored, "g(y)": sp.Integer(1)}
 
     f_x = sp.Mul(*f_x_parts)
     g_y = sp.Mul(*g_y_parts)
 
-    return True, {"f(x)": f_x, "g(x)": g_y}
+    return True, {"f(x)": f_x, "g(y)": g_y}
 
 def is_homogeneous(rhs): # TODO lots of cases will break parser as it doesnt rcognise fractions with brackets
     v = sp.Symbol('v')
@@ -82,28 +82,3 @@ def is_homogeneous(rhs): # TODO lots of cases will break parser as it doesnt rco
         return False, None
 
     return True, {"v_expr": simplified}
-
-linear_test_odes = [
-    "y' + 2*y = e^x",
-    "y' - 3*y = 0",
-    "y' + y = x**2",
-    "y' = x**2",
-    "y' = y**2",
-]
-
-seperable_test_odes = [
-    "y' = x*y",
-    "y' = x**2",
-    "y' = y**2",
-    "y' = e^x/y",
-    "y' = x*y**2 + x",
-    "y' = x+y",
-    "y' = x**2 + y**2",
-]
- 
-for ode_str in seperable_test_odes:
-    eq = parser.parse_ode(ode_str)
-    rhs = normalize_first_order(eq)
-    result = is_seperable(rhs)
-    print(f"{ode_str}  ->  rhs = {rhs}  ->  seperable = {result}")
-    print()

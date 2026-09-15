@@ -53,8 +53,11 @@ def parse_coefficient(text):
 
     y_symbol = sp.symbols('y')
     y_func = sp.Function('y')
+    e_symbol = sp.symbols('e')
     x = sp.symbols('x')
+
     expr = expr.subs(y_symbol, y_func(x))
+    expr = expr.subs(e_symbol, sp.E)
 
     return expr
  
