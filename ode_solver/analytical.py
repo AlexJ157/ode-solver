@@ -4,6 +4,8 @@ import parser
 
 x = sp.symbols('x')
 y = sp.Function('y')
+z = sp.symbols('z')
+
 
 def intergrating_factor(rhs):
     is_linear, data = classifier.is_linear(rhs)
@@ -78,6 +80,56 @@ def seperable(rhs):
 
     return implicit_solution, steps
 
+def homogeneous(rhs):
+    is_homogeneous, data = classifier.is_homogeneous(rhs)
+ 
+    if not is_homogeneous:
+        print("ODE isn't homogeneous and therefore can't be solved this way.")
+        return None, []
+ 
+    g_z = data["G_z"]
+    steps = []
+ 
+    steps.append(("Standard form", f"dy/dx = {rhs}"))
+    steps.append(("Substitution", "Let z = y/x, so y = z*x"))
+    steps.append(("Differentiate y=zx", "dy/dx = x*dz/dx + z"))
+    steps.append(("Substituted RHS", f"G(z) = {g_z}"))
+    steps.append(("Substituted equation", f"x*dz/dx + z = {g_z}"))
+ 
+    rearranged = (g_z - z) / x
+    steps.append(("Rearranged for dz/dx", f"dz/dx = {rearranged}"))
+
+    if sp.simplify(g_z - z) == 0:
+        steps.append(("Special case: dz/dx = 0", "z is constant, so z = C"))
+        C = sp.symbols('C')
+        solution = sp.Eq(y(x), C * x)
+        steps.append(("Solved for y", f"y(x) = {C}*x"))
+        return solution, steps
+    
+    steps.append(("Separated variables", f"dz/({g_z - z}) = dx/x"))
+
+    solution_lhs = sp.integrate(1/(g_z - z), z)
+    solution_rhs = sp.integrate(1/x, x)
+    steps.append(("Integrate LHS (w.r.t. z)", solution_lhs))
+    steps.append(("Integrate RHS (w.r.t. x)", solution_rhs))
+
+    C = sp.symbols('C')
+    z_implicit_solution = sp.Eq(solution_lhs, solution_rhs + C)
+    steps.append(("Implicit general solution", f"{solution_lhs} = {solution_rhs} + C"))
+
+    implicit_solution = z_implicit_solution.subs(z, y(x)/x)
+    steps.append(("Substitute back z = y/x", f"{implicit_solution.lhs} = {implicit_solution.rhs}"))
+
+    try:
+        explicit = sp.solve(implicit_solution, y(x))
+    except NotImplementedError:
+        explicit = []
+
+    if explicit:
+        steps.append(("Solved for y", explicit))
+        return explicit, steps
+
+    return implicit_solution, steps
 
 
 linear_test_odes = [

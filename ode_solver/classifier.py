@@ -73,12 +73,12 @@ def is_seperable(rhs):
 
     return True, {"f(x)": f_x, "g(y)": g_y}
 
-def is_homogeneous(rhs): # TODO lots of cases will break parser as it doesnt rcognise fractions with brackets
-    v = sp.Symbol('v')
-    substituted = rhs.subs(y(x), v*x)
+def is_homogeneous(rhs):  # TODO lots of cases will break parser as it doesnt rcognise fractions with brackets
+    z = sp.Symbol('z')
+    substituted = rhs.subs(y(x), z*x)
     simplified = sp.simplify(substituted)
 
     if simplified.has(x):
         return False, None
 
-    return True, {"v_expr": simplified}
+    return True, {"G_z": simplified}
