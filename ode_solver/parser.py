@@ -3,7 +3,7 @@ import sympy as sp
  
 # example input y' + 2y = e^x
  
-def parse_ode(equation):
+def parse_ode(equation): # TODO add error handling for if couldnt parse ode
     equation = equation.replace(" ", "")
     print(equation)
  
@@ -22,15 +22,12 @@ def parse_ode(equation):
             parsed_right += parse_derivative(expression)
         else:
             parsed_right += parse_expression(expression)
-
-    print(sp.Eq(parsed_left, parsed_right))
  
     return sp.Eq(parsed_left, parsed_right)
  
  
 def split_equation(equation):
     split_equation = equation.split("=")
-    print(split_equation)
     return (split_equation[0], split_equation[1])
 
 

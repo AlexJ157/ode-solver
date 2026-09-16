@@ -1,6 +1,5 @@
 import sympy as sp
-import classifier
-import parser
+from . import classifier
 
 x = sp.symbols('x')
 y = sp.Function('y')
@@ -9,6 +8,7 @@ z = sp.symbols('z')
 
 def intergrating_factor(rhs):
     is_linear, data = classifier.is_linear(rhs)
+    print("ATTEMPTING TO SOLVE USING INTERGRATING FACTOR:\n")
  
     if not is_linear:
         print("ODE cant be solved using the intergrating factor.")
@@ -43,6 +43,7 @@ def intergrating_factor(rhs):
 
 def seperable(rhs):
     is_seperable, data = classifier.is_seperable(rhs)
+    print("ATTEMPTING TO SOLVE BY SEPERABLE METHOD:\n")
 
     if not is_seperable:
         print("ODE isn't seperable and therefore can't be solved this way.")
@@ -82,6 +83,7 @@ def seperable(rhs):
 
 def homogeneous(rhs):
     is_homogeneous, data = classifier.is_homogeneous(rhs)
+    print("ATTEMPTING TO SOLVE HOMOGENEOUS ODE:\n")
  
     if not is_homogeneous:
         print("ODE isn't homogeneous and therefore can't be solved this way.")
@@ -130,36 +132,3 @@ def homogeneous(rhs):
         return explicit, steps
 
     return implicit_solution, steps
-
-
-linear_test_odes = [
-    "y' + 2*y = e^x",
-    "y' - 3*y = 0",
-    "y' + y = x**2",
-    "y' = x**2",
-    "y' = y**2",
-]
-
-seperable_test_odes = [
-    "y' = x*y",
-    "y' = x**2",
-    "y' = y**2",
-    "y' = e^x/y",
-    "y' = x*y**2 + x",
-    "y' = x+y",
-    "y' = x**2 + y**2",
-]
- 
-for ode_str in linear_test_odes:
-    eq = parser.parse_ode(ode_str)
-    rhs = classifier.normalize_first_order(eq)
-    solution, steps = intergrating_factor(rhs)
-    print(f"{ode_str}  ->  solution = {solution}  ->  steps = {steps}")
-    print()
-
-for ode_str in seperable_test_odes:
-    eq = parser.parse_ode(ode_str)
-    rhs = classifier.normalize_first_order(eq)
-    solution, steps = seperable(rhs)
-    print(f"{ode_str}  ->  solution = {solution}  ->  steps = {steps}")
-    print()

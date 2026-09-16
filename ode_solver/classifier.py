@@ -1,5 +1,27 @@
+from dataclasses import dataclass
 import sympy as sp
-import parser
+
+@dataclass
+class Classification:
+    order: int
+    method: str
+    data: dict
+
+
+def classify_first_order(rhs):
+    is_lin, lin_data = is_linear(rhs)
+    if is_lin:
+        return Classification(order=1, method="linear", data=lin_data)
+
+    is_sep, sep_data = is_seperable(rhs)   # renamed from is_seperable to is_sep
+    if is_sep:
+        return Classification(order=1, method="separable", data=sep_data)
+
+    is_hom, hom_data = is_homogeneous(rhs)   # check this one too — same risk
+    if is_hom:
+        return Classification(order=1, method="homogeneous", data=hom_data)
+
+    return Classification(order=1, method="numerical", data={})
 
 x = sp.symbols('x')
 y = sp.Function('y')
@@ -20,7 +42,7 @@ def is_linear(rhs):
     try:
         poly = sp.Poly(rhs, y(x))
     except sp.PolynomialError:
-        # will fail for things like 1/y and sin(y)
+        # TODO will fail for things like 1/y and sin(y)
         return False, None   
 
     degree = poly.degree()
@@ -33,10 +55,10 @@ def is_linear(rhs):
         if c.has(y(x)):
             return False, None
 
-    if degree == 1: # degree = 1 - solve with intergrating factor
+    if degree == 1:
         P = -coeffs[0]
         Q = coeffs[1]
-    else: # degree = 0 - normal intergral
+    else:
         P = 0
         Q = coeffs[0]
 
@@ -61,7 +83,7 @@ def is_seperable(rhs):
         swapped = factor.subs(y(x), placeholder)
 
         if swapped.has(x):
-            return False, None   # genuinely mixed — x remains even without y(x)
+            return False, None
 
         g_y_parts.append(factor)
 
